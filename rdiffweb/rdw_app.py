@@ -54,6 +54,7 @@ from rdiffweb.controller.page_prefs import PreferencesPage
 from rdiffweb.controller.page_restore import RestorePage
 from rdiffweb.controller.page_settings import SettingsPage
 from rdiffweb.controller.page_status import StatusPage
+from rdiffweb.controller.page_theme import ThemePage
 from rdiffweb.core import rdw_templating
 from rdiffweb.core.config import Option, parse_args
 from rdiffweb.core.store import Store
@@ -92,6 +93,7 @@ class Root(LocationsPage):
         self.api.remove_older = self.settings
         self.graphs = GraphsPage()
         self.logs = LogsPage()
+        self.theme = ThemePage()
 
         # Register static dir.
         static_dir = pkg_resources.resource_filename('rdiffweb', 'static')  # @UndefinedVariable
