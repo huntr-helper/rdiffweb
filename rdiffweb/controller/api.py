@@ -58,27 +58,15 @@ def _checkpassword(realm, username, password):
     """
     # Disable password authentication for MFA
     userobj = UserObject.get_user(username)
-    if userobj.mfa:
+    if not userobj or userobj.mfa:
         return False
     # Otherwise validate username password
     return any(cherrypy.engine.publish('login', username, password))
 
 
-@cherrypy.tools.json_out(handler=json_handler)
-@cherrypy.config(**{'error_page.default': False})
-@cherrypy.tools.auth_basic(realm='rdiffweb', checkpassword=_checkpassword, priority=70)
-@cherrypy.tools.auth_form(on=False)
-@cherrypy.tools.auth_mfa(on=False)
-@cherrypy.tools.sessions(on=False)
-@cherrypy.tools.i18n(on=False)
-@cherrypy.tools.ratelimit()
-class ApiPage(Controller):
-    """
-    This class provide a restful API to access some of the rdiffweb resources.
-    """
-
+class ApiCurrentUser(Controller):
     @cherrypy.expose
-    def currentuser(self):
+    def default(self):
         u = self.app.currentuser
         u.refresh_repos()
         return {
@@ -99,6 +87,22 @@ class ApiPage(Controller):
                 for repo_obj in u.repo_objs
             ],
         }
+
+
+@cherrypy.tools.json_out(handler=json_handler)
+@cherrypy.config(**{'error_page.default': False})
+@cherrypy.tools.auth_basic(realm='rdiffweb', checkpassword=_checkpassword, priority=70)
+@cherrypy.tools.auth_form(on=False)
+@cherrypy.tools.auth_mfa(on=False)
+@cherrypy.tools.sessions(on=False)
+@cherrypy.tools.i18n(on=False)
+@cherrypy.tools.ratelimit()
+class ApiPage(Controller):
+    """
+    This class provide a restful API to access some of the rdiffweb resources.
+    """
+
+    currentuser = ApiCurrentUser()
 
     @cherrypy.expose
     def index(self):
